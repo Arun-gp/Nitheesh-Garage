@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nitheesh Garage - Premium Bike Sales & Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" required>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password" onclick="resetPassword()">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+                
+                <button type="button" class="btn btn-google btn-full" onclick="signInWithGoogle()">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+                
+                <div class="auth-switch">
+                    Don't have an account? <a href="#" onclick="showSignupModal()">Sign up</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <span class="close-modal" onclick="closeSignupModal()">&times;</span>
+            </div>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPhone">Phone Number</label>
+                    <input type="tel" id="signupPhone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" class="form-control" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="signupConfirmPassword">Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" class="form-control" required minlength="6">
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+                
+                <button type="button" class="btn btn-google btn-full" onclick="signInWithGoogle()">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+                
+                <div class="auth-switch">
+                    Already have an account? <a href="#" onclick="showLoginModal()">Sign in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dry3pzan6/image/upload/v1763628420/jiupro1owybvcqu9mrgo.png" alt="Nitheesh Garage Logo" class="logo-image">
+                <span class="logo-text">Nitheesh Garage</span>
+            </div>
+            <ul class="nav-links">
+                <li><a onclick="showSection('home')" class="active">Home</a></li>
+                <li><a onclick="showSection('bikes')">Bikes</a></li>
+                <li><a onclick="showSection('services')">Services</a></li>
+                <li><a onclick="showSection('about')">About</a></li>
+                <li><a onclick="showSection('contact')">Contact</a></li>
+                <li><a onclick="showSection('admin')">Admin</a></li>
+                <li class="auth-buttons">
+                    <button class="btn btn-outline btn-nav" onclick="showLoginModal()">Login</button>
+                    <button class="btn btn-primary btn-nav" onclick="showSignupModal()">Sign Up</button>
+                </li>
+            </ul>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <div id="home" class="section active">
+        <div class="hero">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Premium Bike Sales & Service</h1>
+                <p class="hero-subtitle">Experience the best in two-wheeler solutions with our premium collection and
+                    expert services</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary btn-large" onclick="showSection('bikes')">Explore Bikes</button>
+                    <button class="btn btn-secondary btn-large" onclick="showSection('services')">Our Services</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Preview -->
+        <div class="container" style="padding-top: 0;">
+            <div class="section-header">
+                <h2 class="section-title">Our Services</h2>
+                <p class="section-subtitle">Comprehensive two-wheeler solutions tailored to your needs</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <h3>Bike Sales</h3>
+                    <p>Wide range of new and pre-owned bikes with competitive pricing and flexible financing options.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Servicing & Repair</h3>
+                    <p>Expert maintenance and repair services using genuine parts and advanced diagnostic tools.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Spare Parts</h3>
+                    <p>Authentic spare parts and accessories for all major bike brands with warranty coverage.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Media Bar -->
+        <div class="social-bar">
+            <h2>Follow Us on Social Media</h2>
+            <div class="social-links">
+                <a href="https://instagram.com" target="_blank" class="social-link">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://facebook.com" target="_blank" class="social-link">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://wa.me/1234567890" target="_blank" class="social-link">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="https://youtube.com" target="_blank" class="social-link">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bikes Section -->
+    <div id="bikes" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Available Bikes</h2>
+                <p class="section-subtitle">Explore our premium collection of new and pre-owned bikes</p>
+            </div>
+            <div class="bikes-grid" id="bikesGrid">
+                <!-- Bikes will be rendered here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <div id="services" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Services</h2>
+                <p class="section-subtitle">Comprehensive two-wheeler solutions tailored to your needs</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <h3>Bike Sales</h3>
+                    <p>Wide range of new and pre-owned bikes with competitive pricing and flexible financing options.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Servicing & Repair</h3>
+                    <p>Expert maintenance and repair services using genuine parts and advanced diagnostic tools.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Spare Parts</h3>
+                    <p>Authentic spare parts and accessories for all major bike brands with warranty coverage.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3>Customization</h3>
+                    <p>Custom paint jobs, modifications and personalization to make your bike truly unique.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Insurance Help</h3>
+                    <p>Assistance with bike insurance, claims processing and documentation for hassle-free coverage.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3>Exchange Available</h3>
+                    <p>Get the best exchange value for your old bike with our transparent valuation process.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div id="about" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">About Us</h2>
+                <p class="section-subtitle">Learn more about our journey and commitment to excellence</p>
+            </div>
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1601758064237-8a0e61bc5ac1?w=800"
+                        alt="Nitheesh Garage Workshop">
+                </div>
+                <div class="about-text">
+                    <h3>Welcome to Nitheesh Garage</h3>
+                    <p>Established with a passion for motorcycles and a commitment to excellence, Nitheesh Garage has
+                        been serving bike enthusiasts for over a decade. We are your trusted partner for all two-wheeler
+                        needs.</p>
+
+                    <h3>Our Mission</h3>
+                    <p>To provide top-quality bikes, exceptional service, and expert advice to every customer. We
+                        believe in building long-term relationships based on trust, transparency, and complete
+                        satisfaction.</p>
+
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Wide selection of bikes from leading brands</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Experienced and certified mechanics</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Competitive pricing and flexible payment options</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Genuine spare parts and accessories</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div id="contact" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Contact Us</h2>
+                <p class="section-subtitle">Get in touch with us for any queries or services</p>
+            </div>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3>Get In Touch</h3>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Our Location</h4>
+                            <p>Nitheesh Garage, Pallapalayam, Tiruppur</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Phone Number</h4>
+                            <p>+91 93609 97425</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Email Address</h4>
+                            <p>contact@nitheeshgarage.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Working Hours</h4>
+                            <p>Monday - Saturday: 9:00 AM - 8:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form onsubmit="handleContactSubmit(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Section -->
+    <div id="admin" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Admin Panel</h2>
+                <p class="section-subtitle">Manage your bike inventory and website content</p>
+            </div>
+            <div class="admin-container">
+                <div class="admin-form">
+                    <h3>Add New Bike</h3>
+                    <form onsubmit="addBike(event)">
+                        <div class="form-group">
+                            <label for="bikeName">Bike Name</label>
+                            <input type="text" id="bikeName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bikePrice">Price (₹)</label>
+                            <input type="number" id="bikePrice" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bikeDescription">Description</label>
+                            <textarea id="bikeDescription" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Image</label>
+                            <div class="file-upload" onclick="document.getElementById('bikeImage').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to upload bike image</p>
+                                <input type="file" id="bikeImage" accept="image/*" style="display: none;"
+                                    onchange="previewImage(event)" required>
+                            </div>
+                            <img id="imagePreview" class="preview-image">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Add Bike</button>
+                    </form>
+                </div>
+
+                <div class="bike-list">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--secondary);">Manage Bikes</h3>
+                    <div id="bikesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Nitheesh Garage</h3>
+                    <p>Your trusted partner for premium bike sales and service. We provide quality two-wheeler solutions
+                        with exceptional customer service.</p>
+                    <div class="social-links" style="justify-content: flex-start; margin-top: 1.5rem;">
+                        <a href="#" class="social-link" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a onclick="showSection('home')">Home</a></li>
+                        <li><a onclick="showSection('bikes')">Bikes</a></li>
+                        <li><a onclick="showSection('services')">Services</a></li>
+                        <li><a onclick="showSection('about')">About Us</a></li>
+                        <li><a onclick="showSection('contact')">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Our Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Bike Sales</a></li>
+                        <li><a href="#">Servicing & Repair</a></li>
+                        <li><a href="#">Spare Parts</a></li>
+                        <li><a href="#">Customization</a></li>
+                        <li><a href="#">Insurance Help</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Nitheesh Garage, Main Road, City</li>
+                        <li><i class="fas fa-phone-alt"></i> +91 93609 97425</li>
+                        <li><i class="fas fa-envelope"></i> info@nitheeshgarage.com</li>
+                        <li><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 8:00 PM</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Nitheesh Garage. All Rights Reserved. | Designed with <i class="fas fa-heart"
+                        style="color: var(--primary);"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
