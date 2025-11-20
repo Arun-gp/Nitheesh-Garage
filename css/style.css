@@ -176,13 +176,13 @@ nav {
 }
 
 .btn-outline {
-    background: transparent;
+    background: var(--primary);
     border: 2px solid var(--secondary);
-    color: var(--secondary);
+    color: white;
 }
 
 .btn-outline:hover {
-    background: var(--secondary);
+    background: var(--primary-dark);
     color: white;
     transform: translateY(-2px);
 }
