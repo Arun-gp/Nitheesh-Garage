@@ -78,13 +78,19 @@ mobileMenuBtn.addEventListener('click', () => {
     mobileMenuBtn.innerHTML = navLinks.classList.contains('active') 
         ? '<i class="fas fa-times"></i>' 
         : '<i class="fas fa-bars"></i>';
+    
+    // Close profile dropdown when mobile menu is toggled
+    if (!navLinks.classList.contains('active')) {
+        closeProfileDropdown();
+    }
 });
 
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-links a').forEach(link => {
+// Close mobile menu and dropdown when clicking on a link
+document.querySelectorAll('.nav-links a, .dropdown-item').forEach(link => {
     link.addEventListener('click', () => {
         navLinks.classList.remove('active');
         mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        closeProfileDropdown();
     });
 });
 
@@ -280,11 +286,33 @@ async function resetPassword() {
     }
 }
 
+// Profile Dropdown Functions
+function toggleProfileDropdown() {
+    const profileDropdown = document.querySelector('.profile-dropdown');
+    profileDropdown.classList.toggle('active');
+}
+
+function closeProfileDropdown() {
+    const profileDropdown = document.querySelector('.profile-dropdown');
+    profileDropdown.classList.remove('active');
+}
+
+// Close profile dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const profileDropdown = document.querySelector('.profile-dropdown');
+    const isClickInside = profileDropdown.contains(event.target);
+    
+    if (!isClickInside) {
+        closeProfileDropdown();
+    }
+});
+
 async function logout() {
     try {
         await auth.signOut();
         currentUser = null;
         updateAuthUI();
+        closeProfileDropdown();
         showMessage('You have been logged out successfully.', 'success');
     } catch (error) {
         console.error('Logout error:', error);
@@ -298,22 +326,38 @@ auth.onAuthStateChanged((user) => {
     updateAuthUI();
 });
 
+// Update the updateAuthUI function
 function updateAuthUI() {
     const authButtons = document.querySelector('.auth-buttons');
+    const userProfile = document.querySelector('.user-profile');
     
     if (currentUser) {
-        const displayName = currentUser.displayName || currentUser.email;
-        authButtons.innerHTML = `
-            <div class="user-info" style="display: flex; align-items: center; gap: 1rem;">
-                <span style="color: white; font-size: 0.9rem;">Welcome, ${displayName}</span>
-                <button class="btn btn-outline btn-nav" onclick="logout()">Logout</button>
-            </div>
-        `;
+        // Hide auth buttons
+        authButtons.style.display = 'none';
+        userProfile.style.display = 'block';
+        
+        // Update profile information
+        const profileImage = document.getElementById('profileImage');
+        const profileName = document.getElementById('profileName');
+        const dropdownProfileImage = document.getElementById('dropdownProfileImage');
+        const dropdownProfileName = document.getElementById('dropdownProfileName');
+        const dropdownProfileEmail = document.getElementById('dropdownProfileEmail');
+        
+        const displayName = currentUser.displayName || currentUser.email.split('@')[0];
+        const email = currentUser.email;
+        const photoURL = currentUser.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face';
+        
+        profileImage.src = photoURL;
+        profileName.textContent = displayName;
+        dropdownProfileImage.src = photoURL;
+        dropdownProfileName.textContent = displayName;
+        dropdownProfileEmail.textContent = email;
+        
     } else {
-        authButtons.innerHTML = `
-            <button class="btn btn-outline btn-nav" onclick="showLoginModal()">Login</button>
-            <button class="btn btn-primary btn-nav" onclick="showSignupModal()">Sign Up</button>
-        `;
+        // Show auth buttons, hide profile
+        authButtons.style.display = 'flex';
+        userProfile.style.display = 'none';
+        closeProfileDropdown();
     }
 }
 
@@ -556,3 +600,5 @@ window.previewImage = previewImage;
 window.addBike = addBike;
 window.deleteBike = deleteBike;
 window.handleContactSubmit = handleContactSubmit;
+window.toggleProfileDropdown = toggleProfileDropdown;
+window.closeProfileDropdown = closeProfileDropdown;
