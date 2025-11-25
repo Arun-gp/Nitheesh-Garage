@@ -30,17 +30,114 @@ mobileMenuBtn.addEventListener('click', () => {
     
     if (!navLinks.classList.contains('active')) {
         closeProfileDropdown();
+        closeBikesDropdown();
     }
 });
 
 // Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-links a, .dropdown-item').forEach(link => {
+document.querySelectorAll('.nav-links a, .dropdown-item, .nav-dropdown-item').forEach(link => {
     link.addEventListener('click', () => {
         navLinks.classList.remove('active');
         mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
         closeProfileDropdown();
+        closeBikesDropdown();
     });
 });
+
+// Bikes Dropdown Functions
+function toggleBikesDropdown(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const navDropdown = document.querySelector('.nav-dropdown');
+    const dropdownMenu = document.getElementById('bikesDropdownMenu');
+    
+    // Close profile dropdown if open
+    closeProfileDropdown();
+    
+    if (navDropdown.classList.contains('active')) {
+        closeBikesDropdown();
+    } else {
+        navDropdown.classList.add('active');
+        dropdownMenu.style.display = 'block';
+    }
+}
+
+function closeBikesDropdown() {
+    const navDropdown = document.querySelector('.nav-dropdown');
+    const dropdownMenu = document.getElementById('bikesDropdownMenu');
+    
+    if (navDropdown) {
+        navDropdown.classList.remove('active');
+    }
+    if (dropdownMenu) {
+        dropdownMenu.style.display = 'none';
+    }
+}
+
+// Close bikes dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const navDropdown = document.querySelector('.nav-dropdown');
+    const isClickInside = navDropdown && navDropdown.contains(event.target);
+    
+    if (!isClickInside) {
+        closeBikesDropdown();
+    }
+});
+
+// Load bikes in navbar dropdown
+async function loadBikesInNavbar() {
+    const bikesNavList = document.getElementById('bikesNavList');
+    
+    try {
+        const querySnapshot = await db.collection('bikes').orderBy('createdAt', 'desc').limit(10).get();
+        
+        if (querySnapshot.empty) {
+            bikesNavList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--gray); font-size: 0.9rem;">No bikes available</div>';
+            return;
+        }
+        
+        let bikesHTML = '';
+        querySnapshot.forEach((doc) => {
+            const bike = doc.data();
+            const bikeId = doc.id;
+            bikesHTML += `
+                <a onclick="showBikeFromNav('${bikeId}')" class="nav-dropdown-item">
+                    <img src="${bike.imageUrl}" alt="${bike.name}" class="nav-bike-image">
+                    <div class="nav-bike-info">
+                        <span class="nav-bike-name">${bike.name}</span>
+                        <span class="nav-bike-price">₹${parseInt(bike.price).toLocaleString('en-IN')}</span>
+                    </div>
+                </a>
+            `;
+        });
+        
+        bikesNavList.innerHTML = bikesHTML;
+        
+    } catch (error) {
+        console.error('Error loading navbar bikes:', error);
+        bikesNavList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--primary); font-size: 0.9rem;">Error loading bikes</div>';
+    }
+}
+
+// Show specific bike from navbar
+function showBikeFromNav(bikeId) {
+    showSection('bikes');
+    closeBikesDropdown();
+    
+    // Scroll to the specific bike after a short delay
+    setTimeout(() => {
+        const bikeCards = document.querySelectorAll('.bike-card');
+        bikeCards.forEach(card => {
+            if (card.dataset.bikeId === bikeId) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.style.animation = 'highlightBike 2s ease';
+            }
+        });
+    }, 300);
+}
 
 // Modal Functions
 function showLoginModal() {
@@ -246,6 +343,9 @@ async function resetPassword() {
 function toggleProfileDropdown() {
     const profileDropdown = document.querySelector('.profile-dropdown');
     profileDropdown.classList.toggle('active');
+    
+    // Close bikes dropdown if open
+    closeBikesDropdown();
 }
 
 function closeProfileDropdown() {
@@ -255,7 +355,7 @@ function closeProfileDropdown() {
 
 document.addEventListener('click', function(event) {
     const profileDropdown = document.querySelector('.profile-dropdown');
-    const isClickInside = profileDropdown.contains(event.target);
+    const isClickInside = profileDropdown && profileDropdown.contains(event.target);
     
     if (!isClickInside) {
         closeProfileDropdown();
@@ -356,6 +456,7 @@ function showMessage(message, type = 'info') {
 window.addEventListener('load', function() {
     updateAuthUI();
     loadBikesFromFirestore();
+    loadBikesInNavbar();
     
     // Add CSS for message animations
     const style = document.createElement('style');
@@ -368,6 +469,10 @@ window.addEventListener('load', function() {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+        @keyframes highlightBike {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3); }
+        }
     `;
     document.head.appendChild(style);
 });
@@ -375,14 +480,14 @@ window.addEventListener('load', function() {
 // Section Navigation
 function showSection(sectionId) {
     const sections = document.querySelectorAll('.section');
-    const navLinks = document.querySelectorAll('.nav-links a');
+    const navLinks = document.querySelectorAll('.nav-links > li > a');
 
     sections.forEach(section => section.classList.remove('active'));
     navLinks.forEach(link => link.classList.remove('active'));
 
     document.getElementById(sectionId).classList.add('active');
 
-    const activeLink = document.querySelector(`.nav-links a[onclick="showSection('${sectionId}')"]`);
+    const activeLink = document.querySelector(`.nav-links > li > a[onclick="showSection('${sectionId}')"]`);
     if (activeLink) {
         activeLink.classList.add('active');
     }
@@ -418,8 +523,9 @@ async function loadBikesFromFirestore() {
         let bikesHTML = '';
         querySnapshot.forEach((doc) => {
             const bike = doc.data();
+            const bikeId = doc.id;
             bikesHTML += `
-                <div class="bike-card">
+                <div class="bike-card" data-bike-id="${bikeId}">
                     <div class="bike-badge">Available</div>
                     <img src="${bike.imageUrl}" alt="${bike.name}" class="bike-image">
                     <div class="bike-info">
@@ -444,6 +550,9 @@ async function loadBikesFromFirestore() {
         });
         
         bikesGrid.innerHTML = bikesHTML;
+        
+        // Reload navbar bikes
+        loadBikesInNavbar();
         
     } catch (error) {
         console.error('Error loading bikes:', error);
@@ -573,8 +682,9 @@ async function addBike(event) {
         event.target.reset();
         document.getElementById('imagePreview').style.display = 'none';
 
-        // Reload admin bikes
+        // Reload admin bikes and navbar bikes
         await loadAdminBikes();
+        await loadBikesInNavbar();
 
         showMessage('Bike added successfully!', 'success');
 
@@ -608,8 +718,9 @@ async function deleteBike(bikeId, imagePath) {
         // Delete bike from Firestore
         await db.collection('bikes').doc(bikeId).delete();
 
-        // Reload admin bikes
+        // Reload admin bikes and navbar bikes
         await loadAdminBikes();
+        await loadBikesInNavbar();
 
         showMessage('Bike deleted successfully!', 'success');
 
@@ -645,3 +756,6 @@ window.deleteBike = deleteBike;
 window.handleContactSubmit = handleContactSubmit;
 window.toggleProfileDropdown = toggleProfileDropdown;
 window.closeProfileDropdown = closeProfileDropdown;
+window.toggleBikesDropdown = toggleBikesDropdown;
+window.closeBikesDropdown = closeBikesDropdown;
+window.showBikeFromNav = showBikeFromNav;

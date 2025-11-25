@@ -120,7 +120,23 @@
             </div>
             <ul class="nav-links">
                 <li><a onclick="showSection('home')" class="active">Home</a></li>
-                <li><a onclick="showSection('bikes')">Bikes</a></li>
+                <li class="nav-dropdown">
+                    <a onclick="toggleBikesDropdown(event)" class="bikes-dropdown-trigger">
+                        Bikes <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <div class="nav-dropdown-menu" id="bikesDropdownMenu">
+                        <a onclick="showSection('bikes')" class="nav-dropdown-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>All Bikes</span>
+                        </a>
+                        <div class="nav-dropdown-divider"></div>
+                        <div id="bikesNavList">
+                            <div style="padding: 1rem; text-align: center; color: var(--gray); font-size: 0.9rem;">
+                                <i class="fas fa-spinner fa-spin"></i> Loading bikes...
+                            </div>
+                        </div>
+                    </div>
+                </li>
                 <li><a onclick="showSection('services')">Services</a></li>
                 <li><a onclick="showSection('about')">About</a></li>
                 <li><a onclick="showSection('contact')">Contact</a></li>
